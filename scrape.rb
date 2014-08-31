@@ -1,24 +1,28 @@
 require 'nokogiri'
 require 'open-uri'
+require 'retriable'
 
 root = 'https://rubygems.org'
-headers = {
-  "User-Agent" => "curl/7.30.0",
-  "Accept" => 'text/html'
-}
-
 start = '000'
+
+def load(uri)
+  Retriable.retriable do
+    headers = {
+      "User-Agent" => "curl/7.30.0",
+      "Accept" => 'text/html'
+    }
+    Nokogiri::HTML(open(uri, headers))
+  end
+end
 
 ('A'..'Z').to_a.each do |letter|
   suffix = "/gems?letter=#{letter}&page=1"
   while true do
-    doc = Nokogiri::HTML(
-      open(root + suffix, headers)
-    )
+    doc = load(root + suffix)
     doc.css('div.gems ol li a').each do |link|
       uri = link['href']
       next if uri < "/gems/#{start}"
-      page = Nokogiri::HTML(open(root + uri, headers))
+      page = load(root + uri)
       text = ''
       title = page.at_css('h2 a')
       text += title
