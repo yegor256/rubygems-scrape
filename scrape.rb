@@ -4,7 +4,7 @@ require 'open-uri'
 root = 'https://rubygems.org'
 headers = {
   "User-Agent" => "curl/7.30.0",
-  "Accept" => '*/*'
+  "Accept" => 'text/html'
 }
 
 start = '000'
@@ -22,7 +22,7 @@ start = '000'
       text = ''
       title = page.at_css('h2 a')
       text += title
-      source = page.at_css('div.links a')
+      source = page.css('div.links a').find{ |a| a['href'].include? 'github.com' }
       text += ',' + (source ? source['href'] : 'nil')
       downloads = page.at_css('div.downloads span:first-child strong')
       text += ',' + (downloads ? downloads.text.gsub(',', '') : '0')
